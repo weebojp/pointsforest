@@ -4,7 +4,7 @@ A comprehensive gamification platform built with Next.js 15, TypeScript, and Sup
 
 ## 🚀 Features
 
-### ✅ **Implemented (Phase 1)**
+### ✅ **Implemented (Phase 1-2.5 Completed)**
 
 #### 🔐 **Authentication System**
 - Email/password registration and login
@@ -21,8 +21,36 @@ A comprehensive gamification platform built with Next.js 15, TypeScript, and Sup
 #### 🎮 **Mini-Games**
 - **Number Guessing Game**: Predict numbers 1-100 with accuracy-based scoring
 - **Roulette Game**: Spin the wheel with weighted probabilities and visual animations
+- **Slot Machine**: 3-reel slot with 7 symbols and jackpot system
 - Daily play limits per game
 - Real-time score calculation and point rewards
+
+#### 🏆 **Achievement System**
+- 23 unique achievements across multiple categories
+- Rarity tiers: Common, Rare, Epic, Legendary
+- Real-time progress tracking
+- Automatic unlock notifications
+- Category filtering and progress visualization
+
+#### 📈 **Leaderboard System**
+- Total points ranking
+- Level-based leaderboards
+- Login streak rankings
+- Achievement count leaderboards
+- Real-time position updates
+
+#### 💧 **Lucky Springs (ラッキースプリング)**
+- Once-per-day mystical springs with probability-based rewards
+- 5 reward tiers: Common (50%) to Mythical (1%)
+- Level-gated access (Forest Spring Lv.1+, Crystal Spring Lv.10+)
+- 60+ water-themed CSS animations
+- Visit history and statistics tracking
+
+#### 👤 **Profile & Avatar System**
+- Customizable user profiles
+- Avatar frame system (Bronze, Silver, Gold, Rainbow)
+- Purchase history tracking
+- CSS-based animated frames with glow effects
 
 #### 📊 **Dashboard**
 - User statistics and progress tracking
@@ -31,18 +59,21 @@ A comprehensive gamification platform built with Next.js 15, TypeScript, and Sup
 - Quick access to all features
 
 #### 🎨 **UI/UX**
+- **Unified Navigation**: AppHeader component on all pages
+- **Breadcrumb Navigation**: Shows current page context
 - Modern, responsive design with Tailwind CSS
 - Japanese language support
-- Forest-themed color palette
-- Smooth animations and interactions
-- Mobile-friendly PWA capabilities
+- Forest & water-themed design system
+- 60+ custom CSS animations
+- Mobile-friendly responsive layouts
 
-### 🚧 **Coming Soon (Phase 2)**
-- Achievement system with badges
-- Leaderboards and rankings
+### 🚧 **Coming Soon (Phase 3)**
+- Point shop with avatar accessories
+- Social features (friends, guilds, messaging)
+- Premium membership system
 - AI-generated avatars
-- Point shop with virtual items
-- Social features (friends, messaging)
+- Additional mini-games
+- B2B white-label platform
 
 ## 🛠️ Technology Stack
 
@@ -58,6 +89,7 @@ A comprehensive gamification platform built with Next.js 15, TypeScript, and Sup
 - **PostgreSQL** - Primary database with RLS
 - **Edge Functions** - Serverless functions
 - **Real-time** - Live updates and subscriptions
+- **Row Level Security** - Secure data access control
 
 ### **Infrastructure**
 - **Vercel** - Deployment and hosting
@@ -96,9 +128,13 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
 
 4. **Set up the database**
+
+For Lucky Springs feature, execute the following SQL in Supabase SQL Editor:
 ```bash
-npm run setup-db
+# Copy the contents of lucky-springs-setup.sql and run in Supabase Dashboard
 ```
+
+For other tables, they will be created automatically via Supabase migrations.
 
 5. **Start the development server**
 ```bash
@@ -237,24 +273,38 @@ npm run build
 
 This project is private and proprietary.
 
+## 🆕 Recent Updates (July 2025)
+
+### Latest Features
+- ✅ **Unified Navigation**: AppHeader component on all pages
+- ✅ **Breadcrumb Navigation**: Clear page context indicators
+- ✅ **Database Error Fixes**: Improved slot machine stability
+- ✅ **Performance Improvements**: Optimized loading times
+
+### Bug Fixes
+- Fixed "Error fetching plays today" in slot machine
+- Resolved performance monitor error spam
+- Improved error handling across all features
+
 ## 🎯 Roadmap
 
-### Phase 2 (Next 2-4 weeks)
-- [ ] Achievement system implementation
-- [ ] Leaderboards with real-time updates
-- [ ] AI avatar generation
-- [ ] Point shop with virtual items
+### Immediate Next Steps
+- [ ] Execute `lucky-springs-setup.sql` in Supabase
+- [ ] Implement point shop for avatar frames
+- [ ] Add Zustand state management
+- [ ] Create comprehensive test suite
 
-### Phase 3 (Month 2)
-- [ ] Social features (friends, messaging)
-- [ ] Guild system and competitions
-- [ ] Mobile app development
+### Phase 3 (Coming Soon)
+- [ ] Quest system with daily/weekly challenges
+- [ ] Gacha system for rare items
+- [ ] Enhanced ranking system
+- [ ] Social features (friends, guilds)
+- [ ] Premium membership tiers
+
+### Phase 4 (Future)
+- [ ] Mobile app (React Native)
+- [ ] B2B white-label platform
 - [ ] Advanced analytics dashboard
-
-### Phase 4 (Month 3+)
-- [ ] Enterprise features
-- [ ] White-label solutions
-- [ ] API marketplace
 - [ ] Global expansion
 
 ## 📞 Support
