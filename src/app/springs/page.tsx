@@ -8,10 +8,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Droplets, Sparkles, Crown, Star, Zap } from 'lucide-react'
+import { Loader2, Droplets, Sparkles, Crown, Star, Zap, Trees, LogOut, User, Settings, Home, ChevronRight } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { SpringComponent } from '@/components/features/springs/SpringComponent'
 import { SpringHistoryComponent } from '@/components/features/springs/SpringHistoryComponent'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { AppHeader } from '@/components/layout/AppHeader'
 
 interface LuckySpring {
   id: string
@@ -57,7 +60,8 @@ const THEME_ICONS = {
 // Moved to SpringHistoryComponent where it's actually used
 
 export default function SpringsPage() {
-  const { user, loading: authLoading } = useAuth()
+  const { user, profile, signOut, loading: authLoading } = useAuth()
+  const router = useRouter()
   const [springs, setSprings] = useState<LuckySpring[]>([])
   const [springHistory, setSpringHistory] = useState<SpringVisit[]>([])
   const [loading, setLoading] = useState(true)
@@ -132,6 +136,21 @@ export default function SpringsPage() {
       console.error('Error fetching spring history:', error)
     }
   }, [user?.id])
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      router.push('/auth/login')
+    } catch (error) {
+      console.error('Error signing out:', error)
+      toast({
+        title: 'エラー',
+        description: 'ログアウトに失敗しました。',
+        variant: 'destructive'
+      })
+    }
+  }
 
   // Visit spring function
   const visitSpring = async (springSlug: string) => {
@@ -221,9 +240,17 @@ export default function SpringsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <AppHeader 
+        showBreadcrumb={true}
+        breadcrumbItems={[
+          { label: 'ラッキースプリング', icon: Droplets }
+        ]}
+      />
+
+      <div className="max-w-7xl mx-auto p-4">
+
+        {/* Page Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
             <div className="relative">

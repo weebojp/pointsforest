@@ -24,6 +24,7 @@ import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import { formatPoints, formatDate } from '@/lib/utils'
 import Link from 'next/link'
+import { AppHeader } from '@/components/layout/AppHeader'
 
 interface DashboardStats {
   totalPoints: number
@@ -193,44 +194,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Trees className="h-8 w-8 text-green-600 mr-3" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Points Forest</h1>
-                <p className="text-sm text-gray-600">
-                  ようこそ、{profile?.display_name || profile?.username}さん！
-                </p>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <Button asChild variant="outline">
-                <Link href="/profile">
-                  <User className="h-4 w-4 mr-2" />
-                  プロフィール
-                </Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/settings">
-                  <Settings className="h-4 w-4 mr-2" />
-                  設定
-                </Link>
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleSignOut}
-                className="flex items-center"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                ログアウト
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
       <div className="container mx-auto px-4 py-8">
         {/* Daily Bonus */}

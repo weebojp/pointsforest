@@ -29,6 +29,7 @@ import {
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
+import { AppHeader } from '@/components/layout/AppHeader'
 
 interface UserSettings {
   // Theme settings
@@ -222,36 +223,26 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Trees className="h-8 w-8 text-green-600 mr-3" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">設定</h1>
-                <p className="text-sm text-gray-600">
-                  アカウントと設定を管理
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              {hasUnsavedChanges && (
-                <Badge variant="outline" className="text-orange-600 border-orange-300">
-                  <AlertTriangle className="h-3 w-3 mr-1" />
-                  未保存の変更
-                </Badge>
-              )}
-              <Button asChild variant="outline">
-                <Link href="/dashboard">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  ダッシュボード
-                </Link>
-              </Button>
+      <AppHeader 
+        showBreadcrumb={true}
+        breadcrumbItems={[
+          { label: '設定', icon: User }
+        ]}
+      />
+      
+      {/* Settings Status Bar */}
+      {hasUnsavedChanges && (
+        <div className="bg-orange-50 border-b border-orange-200">
+          <div className="container mx-auto px-4 py-2">
+            <div className="flex items-center justify-center">
+              <Badge variant="outline" className="text-orange-600 border-orange-300">
+                <AlertTriangle className="h-3 w-3 mr-1" />
+                未保存の変更があります
+              </Badge>
             </div>
           </div>
         </div>
-      </header>
+      )}
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="profile" className="w-full">

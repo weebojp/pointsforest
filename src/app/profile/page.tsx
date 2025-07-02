@@ -27,6 +27,7 @@ import { supabase } from '@/lib/supabase'
 import { formatPoints, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import type { AvatarFrame, UserAvatarFrame, Purchase } from '@/types/avatar'
+import { AppHeader } from '@/components/layout/AppHeader'
 
 interface ProfileData {
   displayName: string
@@ -228,27 +229,12 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Trees className="h-8 w-8 text-green-600 mr-3" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">マイプロフィール</h1>
-                <p className="text-sm text-gray-600">
-                  アバターをカスタマイズして自分だけのキャラクターを作ろう
-                </p>
-              </div>
-            </div>
-            <Button asChild variant="outline">
-              <Link href="/dashboard">
-                ← ダッシュボード
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader 
+        showBreadcrumb={true}
+        breadcrumbItems={[
+          { label: 'マイプロフィール', icon: User }
+        ]}
+      />
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
