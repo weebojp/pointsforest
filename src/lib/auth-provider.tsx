@@ -27,15 +27,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        await fetchProfile(session.user.id)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        setSession(session)
+        setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          await fetchProfile(session.user.id)
+        }
+      } catch (error) {
+        console.error('Error getting initial session:', error)
+      } finally {
+        setLoading(false)
       }
-      
-      setLoading(false)
     }
 
     getInitialSession()
@@ -43,6 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email)
         setSession(session)
         setUser(session?.user ?? null)
         
@@ -61,6 +66,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId)
+      
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -69,56 +76,124 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Error fetching profile:', error)
+        
+        // プロフィールが存在しない場合は作成を試行
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found, will be created by trigger or manually')
+        }
         return
       }
 
+      console.log('Profile fetched:', data)
       setProfile(data)
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      console.error('Error in fetchProfile:', error)
     }
   }
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return { error }
+    try {
+      console.log('Attempting sign in for:', email)
+      
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (error) {
+        console.error('Sign in error:', error)
+      } else {
+        console.log('Sign in successful')
+      }
+      
+      return { error }
+    } catch (error) {
+      console.error('Sign in exception:', error)
+      return { error }
+    }
   }
 
   const signUp = async (email: string, password: string, username: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username,
-          display_name: username,
+    try {
+      console.log('Attempting sign up for:', email, 'with username:', username)
+      
+      // ステップ1: Supabase Auth でユーザー作成
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+            display_name: username,
+          }
         }
-      }
-    })
+      })
 
-    if (!error && data.user) {
-      // Create user profile
+      if (error) {
+        console.error('Auth sign up error:', error)
+        return { error }
+      }
+
+      console.log('Auth sign up successful:', data.user?.id)
+
+      // ステップ2: プロフィール作成を試行（手動フォールバック）
+      if (data.user && !data.user.email_confirmed_at) {
+        console.log('User created, email confirmation required')
+        
+        // メール確認が必要な場合、トリガーが後で動作する
+        return { error: null }
+      }
+
+      // ステップ3: ユーザーがすでに確認済みの場合、手動でプロフィール作成
+      if (data.user && data.user.email_confirmed_at) {
+        await createUserProfile(data.user.id, email, username)
+      }
+
+      return { error: null }
+    } catch (error) {
+      console.error('Sign up exception:', error)
+      return { error }
+    }
+  }
+
+  const createUserProfile = async (userId: string, email: string, username: string) => {
+    try {
+      console.log('Creating user profile manually for:', userId)
+      
       const { error: profileError } = await supabase
         .from('users')
         .insert({
-          id: data.user.id,
-          email: data.user.email!,
-          username,
+          id: userId,
+          email: email,
+          username: username,
           display_name: username,
         })
 
       if (profileError) {
-        console.error('Error creating profile:', profileError)
+        console.error('Manual profile creation error:', profileError)
+        
+        // 既に存在する場合は無視
+        if (profileError.code !== '23505') { // duplicate key error
+          throw profileError
+        } else {
+          console.log('Profile already exists, continuing...')
+        }
+      } else {
+        console.log('Manual profile creation successful')
       }
+    } catch (error) {
+      console.error('Error in createUserProfile:', error)
+      // プロフィール作成エラーでも認証は成功しているので続行
     }
-
-    return { error }
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+      setProfile(null)
+    } catch (error) {
+      console.error('Sign out error:', error)
+    }
   }
 
   const refreshProfile = async () => {

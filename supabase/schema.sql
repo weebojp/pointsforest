@@ -1,4 +1,4 @@
--- Points Forest Database Schema
+-- Points Forest Database Schema (修正版)
 -- This file sets up the complete database structure for the gamification platform
 
 -- Enable necessary extensions
@@ -201,19 +201,23 @@ CREATE TABLE IF NOT EXISTS leaderboard_entries (
   UNIQUE(leaderboard_id, user_id, period_start)
 );
 
--- Create indexes for performance
+-- Create indexes for performance (修正版 - IMMUTABLE エラー対応)
 CREATE INDEX IF NOT EXISTS idx_users_points ON users(points DESC);
 CREATE INDEX IF NOT EXISTS idx_users_level ON users(level DESC);
 CREATE INDEX IF NOT EXISTS idx_users_login_streak ON users(login_streak DESC);
 CREATE INDEX IF NOT EXISTS idx_users_last_login ON users(last_login_at);
+CREATE INDEX IF NOT EXISTS idx_users_premium ON users(is_premium, premium_expires_at);
 
 CREATE INDEX IF NOT EXISTS idx_point_transactions_user ON point_transactions(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_point_transactions_type ON point_transactions(type, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_point_transactions_source ON point_transactions(source, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_point_transactions_reference ON point_transactions(reference_id);
 
 CREATE INDEX IF NOT EXISTS idx_game_sessions_user ON game_sessions(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_game_sessions_game ON game_sessions(game_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_game_sessions_daily ON game_sessions(user_id, game_id, (created_at::date));
+-- 修正: 日付関数インデックスを通常のインデックスに変更
+CREATE INDEX IF NOT EXISTS idx_game_sessions_daily ON game_sessions(user_id, game_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_game_sessions_score ON game_sessions(game_id, score DESC);
 
 CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON user_achievements(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_achievements_completed ON user_achievements(completed_at) WHERE completed_at IS NOT NULL;
@@ -272,11 +276,12 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger to create user profile on signup
-CREATE OR REPLACE TRIGGER on_auth_user_created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
--- Function to handle game sessions
+-- Function to handle game sessions (修正版)
 CREATE OR REPLACE FUNCTION handle_game_session(
   p_user_id UUID,
   p_game_id UUID,
@@ -295,12 +300,12 @@ DECLARE
   v_transaction_id UUID;
   v_current_balance INTEGER;
 BEGIN
-  -- Check daily limit
+  -- Check daily limit (修正: DATE()関数を使用)
   SELECT count(*) INTO v_daily_count
   FROM game_sessions gs
   WHERE gs.user_id = p_user_id 
     AND gs.game_id = p_game_id
-    AND gs.created_at::date = CURRENT_DATE;
+    AND DATE(gs.created_at) = CURRENT_DATE;
   
   SELECT daily_limit INTO v_game_limit
   FROM games 
@@ -350,7 +355,7 @@ BEGIN
 END;
 $$;
 
--- Function to process daily bonus
+-- Function to process daily bonus (修正版)
 CREATE OR REPLACE FUNCTION process_daily_bonus(p_user_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -369,7 +374,7 @@ BEGIN
   WHERE id = p_user_id;
   
   -- Check if user already claimed bonus today
-  IF v_user_record.last_daily_bonus_at::date = CURRENT_DATE THEN
+  IF DATE(v_user_record.last_daily_bonus_at) = CURRENT_DATE THEN
     RETURN jsonb_build_object(
       'success', false,
       'error', 'Daily bonus already claimed today'
@@ -380,7 +385,7 @@ BEGIN
   IF v_user_record.last_daily_bonus_at IS NULL THEN
     v_days_since_last_bonus := 0;
   ELSE
-    v_days_since_last_bonus := CURRENT_DATE - v_user_record.last_daily_bonus_at::date;
+    v_days_since_last_bonus := CURRENT_DATE - DATE(v_user_record.last_daily_bonus_at);
   END IF;
   
   -- Calculate new streak
@@ -420,7 +425,7 @@ BEGIN
 END;
 $$;
 
--- Basic achievement checking function
+-- Basic achievement checking function (修正版)
 CREATE OR REPLACE FUNCTION check_achievements(p_user_id UUID)
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -493,7 +498,7 @@ BEGIN
 END;
 $$;
 
--- Function to complete an achievement
+-- Function to complete an achievement (修正版)
 CREATE OR REPLACE FUNCTION complete_achievement(p_user_id UUID, p_achievement_id UUID)
 RETURNS VOID
 LANGUAGE plpgsql
@@ -559,7 +564,8 @@ INSERT INTO games (name, slug, type, description, instructions, config, daily_li
    {"id": 6, "label": "500pt", "points": 500, "probability": 0.015, "color": "#6366f1"},
    {"id": 7, "label": "1000pt", "points": 1000, "probability": 0.005, "color": "#dc2626"}
  ]}',
- 3, 5, 1000);
+ 3, 5, 1000)
+ON CONFLICT (slug) DO NOTHING;
 
 -- Insert initial achievements
 INSERT INTO achievements (name, slug, description, category, rarity, conditions, point_reward, sort_order) VALUES
@@ -569,7 +575,8 @@ INSERT INTO achievements (name, slug, description, category, rarity, conditions,
 ('初回1000ポイント', 'first-1000-points', '1000ポイントを獲得しました', 'points', 'common', '{}', 100, 4),
 ('ミリオネア', 'points-millionaire', '1,000,000ポイントを獲得しました', 'points', 'legendary', '{}', 50000, 5),
 ('ゲーマー', 'games-played-10', '10回ゲームをプレイしました', 'games', 'common', '{}', 200, 6),
-('ゲームマスター', 'games-played-100', '100回ゲームをプレイしました', 'games', 'rare', '{}', 1000, 7);
+('ゲームマスター', 'games-played-100', '100回ゲームをプレイしました', 'games', 'rare', '{}', 1000, 7)
+ON CONFLICT (slug) DO NOTHING;
 
 -- Insert initial leaderboards
 INSERT INTO leaderboards (name, type, period, max_entries) VALUES
@@ -577,4 +584,5 @@ INSERT INTO leaderboards (name, type, period, max_entries) VALUES
 ('今月のポイントランキング', 'points', 'monthly', 50),
 ('今週のポイントランキング', 'points', 'weekly', 50),
 ('レベルランキング', 'level', 'all_time', 100),
-('ログインストリークランキング', 'streak', 'all_time', 50);
+('ログインストリークランキング', 'streak', 'all_time', 50)
+ON CONFLICT DO NOTHING;
