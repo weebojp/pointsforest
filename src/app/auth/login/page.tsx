@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Trees, Loader2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-provider'
 import { useToast } from '@/hooks/use-toast'
+import { parseError, getToastFromError } from '@/lib/error-handler'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -28,22 +29,33 @@ export default function LoginPage() {
       const { error } = await signIn(email, password)
       
       if (error) {
+        const appError = parseError(error)
+        const toastConfig = getToastFromError(appError)
+        
         toast({
-          title: 'ログインエラー',
-          description: error.message || 'ログインに失敗しました',
-          variant: 'destructive'
+          title: toastConfig.title,
+          description: toastConfig.description,
+          variant: toastConfig.variant,
+          duration: toastConfig.duration
         })
       } else {
         toast({
           title: 'ログイン成功',
-          description: 'Points Forestへようこそ！'
+          description: 'Points Forestへようこそ！',
+          duration: 2000
         })
-        router.push('/dashboard')
+        // 即座にリダイレクトしない（ローディング状態を改善）
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 500)
       }
     } catch (error) {
+      const appError = parseError(error)
+      const toastConfig = getToastFromError(appError)
+      
       toast({
-        title: 'エラー',
-        description: '予期しないエラーが発生しました',
+        title: toastConfig.title,
+        description: toastConfig.description,
         variant: 'destructive'
       })
     } finally {

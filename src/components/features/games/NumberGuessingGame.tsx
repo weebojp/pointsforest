@@ -9,6 +9,7 @@ import { Target, Trophy, RotateCcw } from 'lucide-react'
 import { useAuth } from '@/lib/auth-provider'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { parseError, getToastFromError, ERROR_CODES, AppError } from '@/lib/error-handler'
 import type { Game } from '@/types/user'
 
 interface NumberGuessingGameProps {
@@ -65,21 +66,35 @@ export function NumberGuessingGame({ game, onComplete }: NumberGuessingGameProps
       })
 
       if (error) {
-        console.error('Game session error:', error.message || error)
+        console.error('Game session error:', error)
+        const appError = parseError(error)
+        const toastConfig = getToastFromError(appError)
+        
         toast({
-          title: 'エラー',
-          description: `ゲーム結果の保存に失敗しました: ${error.message || 'Unknown error'}`,
-          variant: 'destructive'
+          title: toastConfig.title,
+          description: toastConfig.description,
+          variant: toastConfig.variant,
+          duration: toastConfig.duration
         })
         setGameState(prev => ({ ...prev, status: 'playing' }))
         return
       }
 
       if (!data.success) {
+        const limitError = new AppError(
+          data.error || 'Daily limit exceeded',
+          ERROR_CODES.DAILY_LIMIT_EXCEEDED,
+          'low',
+          '明日また挑戦してください！他のゲームも試してみませんか？',
+          '本日のプレイ上限に達しました'
+        )
+        const toastConfig = getToastFromError(limitError)
+        
         toast({
-          title: '制限エラー',
-          description: data.error || 'ゲームをプレイできませんでした',
-          variant: 'destructive'
+          title: toastConfig.title,
+          description: toastConfig.description,
+          variant: toastConfig.variant,
+          duration: toastConfig.duration
         })
         setGameState(prev => ({ ...prev, status: 'playing' }))
         return

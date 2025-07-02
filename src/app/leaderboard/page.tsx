@@ -98,27 +98,27 @@ export default function LeaderboardPage() {
       const leaderboard = leaderboards.find(lb => lb.id === leaderboardId)
       if (!leaderboard) return
 
-      let entries: LeaderboardEntry[] = []
+      let rawEntries: Omit<LeaderboardEntry, 'rank' | 'is_current_user'>[] = []
 
       switch (leaderboard.type) {
         case 'total_points':
-          entries = await fetchTotalPointsLeaderboard()
+          rawEntries = await fetchTotalPointsLeaderboard()
           break
         case 'weekly_points':
-          entries = await fetchWeeklyPointsLeaderboard()
+          rawEntries = await fetchWeeklyPointsLeaderboard()
           break
         case 'monthly_games':
-          entries = await fetchMonthlyGamesLeaderboard()
+          rawEntries = await fetchMonthlyGamesLeaderboard()
           break
         case 'login_streak':
-          entries = await fetchLoginStreakLeaderboard()
+          rawEntries = await fetchLoginStreakLeaderboard()
           break
         default:
           console.warn('Unknown leaderboard type:', leaderboard.type)
       }
 
       // Add rank and mark current user
-      const rankedEntries = entries.map((entry, index) => ({
+      const rankedEntries: LeaderboardEntry[] = rawEntries.map((entry, index) => ({
         ...entry,
         rank: index + 1,
         is_current_user: entry.user_id === user.id
@@ -137,7 +137,7 @@ export default function LeaderboardPage() {
     }
   }
 
-  const fetchTotalPointsLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+  const fetchTotalPointsLeaderboard = async (): Promise<Omit<LeaderboardEntry, 'rank' | 'is_current_user'>[]> => {
     const { data, error } = await supabase
       .from('users')
       .select('id, username, display_name, points')
@@ -154,7 +154,7 @@ export default function LeaderboardPage() {
     }))
   }
 
-  const fetchWeeklyPointsLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+  const fetchWeeklyPointsLeaderboard = async (): Promise<Omit<LeaderboardEntry, 'rank' | 'is_current_user'>[]> => {
     const weekStart = new Date()
     weekStart.setDate(weekStart.getDate() - weekStart.getDay())
     weekStart.setHours(0, 0, 0, 0)
@@ -193,7 +193,7 @@ export default function LeaderboardPage() {
       .slice(0, 100)
   }
 
-  const fetchMonthlyGamesLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+  const fetchMonthlyGamesLeaderboard = async (): Promise<Omit<LeaderboardEntry, 'rank' | 'is_current_user'>[]> => {
     const monthStart = new Date()
     monthStart.setDate(1)
     monthStart.setHours(0, 0, 0, 0)
@@ -230,7 +230,7 @@ export default function LeaderboardPage() {
       .slice(0, 100)
   }
 
-  const fetchLoginStreakLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+  const fetchLoginStreakLeaderboard = async (): Promise<Omit<LeaderboardEntry, 'rank' | 'is_current_user'>[]> => {
     const { data, error } = await supabase
       .from('users')
       .select('id, username, display_name, login_streak')

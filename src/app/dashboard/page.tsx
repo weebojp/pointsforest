@@ -14,7 +14,10 @@ import {
   Star,
   Flame,
   Gift,
-  LogOut
+  LogOut,
+  HelpCircle,
+  Settings,
+  User
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
@@ -79,46 +82,49 @@ export default function DashboardPage() {
   }, [user, authLoading, router])
 
   const fetchDashboardData = async () => {
-    if (!user) return
+    if (!user || !profile) return
 
     try {
-      // Fetch user profile with current stats
-      if (profile) {
-        setStats({
-          totalPoints: profile.points,
-          level: profile.level,
-          experience: profile.experience,
-          loginStreak: profile.login_streak,
-          gamesPlayedToday: 0, // Will fetch separately
-          achievementsUnlocked: 0 // Will fetch separately
-        })
+      // 即座に利用可能な統計情報を設定（プロフィールから）
+      setStats({
+        totalPoints: profile.points || 0,
+        level: profile.level || 1,
+        experience: profile.experience || 0,
+        loginStreak: profile.login_streak || 0,
+        gamesPlayedToday: 0, // 後で非同期取得
+        achievementsUnlocked: 0 // 後で非同期取得
+      })
 
-        // Check if daily bonus was claimed today
-        const today = new Date().toISOString().split('T')[0]
-        const lastBonus = profile.last_daily_bonus_at
-        setDailyBonusClaimed(lastBonus?.startsWith(today) || false)
-      }
+      // デイリーボーナス状態をチェック
+      const today = new Date().toISOString().split('T')[0]
+      const lastBonus = profile.last_daily_bonus_at
+      setDailyBonusClaimed(lastBonus ? lastBonus.startsWith(today) : false)
 
-      // Fetch games played today
-      const { data: gamesToday } = await supabase
-        .from('game_sessions')
-        .select('id')
-        .eq('user_id', user.id)
-        .gte('created_at', new Date().toISOString().split('T')[0])
-
-      // Fetch achievements unlocked
-      const { data: achievements } = await supabase
-        .from('user_achievements')
-        .select('id')
-        .eq('user_id', user.id)
-        .not('completed_at', 'is', null)
-
-      setStats(prev => ({
-        ...prev,
-        gamesPlayedToday: gamesToday?.length || 0,
-        achievementsUnlocked: achievements?.length || 0
-      }))
-
+      // 非クリティカルなデータを非同期で取得（ページの表示を遅らせない）
+      Promise.all([
+        // 今日のゲーム数
+        supabase
+          .from('game_sessions')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('created_at', new Date().toISOString().split('T')[0]),
+        
+        // アチーブメント数
+        supabase
+          .from('user_achievements')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .not('completed_at', 'is', null)
+      ]).then(([gamesResult, achievementsResult]) => {
+        setStats(prev => ({
+          ...prev,
+          gamesPlayedToday: gamesResult.count || 0,
+          achievementsUnlocked: achievementsResult.count || 0
+        }))
+      }).catch(error => {
+        console.error('Error fetching secondary dashboard data:', error)
+      })
+      
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
     } finally {
@@ -199,14 +205,28 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={handleSignOut}
-              className="flex items-center"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              ログアウト
-            </Button>
+            <div className="flex space-x-3">
+              <Button asChild variant="outline">
+                <Link href="/profile">
+                  <User className="h-4 w-4 mr-2" />
+                  プロフィール
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/settings">
+                  <Settings className="h-4 w-4 mr-2" />
+                  設定
+                </Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleSignOut}
+                className="flex items-center"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                ログアウト
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -298,7 +318,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="game-card-hover">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -351,6 +371,25 @@ export default function DashboardPage() {
               <Button asChild variant="outline" className="w-full">
                 <Link href="/leaderboard">
                   ランキング
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="game-card-hover">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <HelpCircle className="h-5 w-5 mr-2 text-purple-600" />
+                ヘルプ
+              </CardTitle>
+              <CardDescription>
+                使い方やよくある質問を確認
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/help">
+                  ヘルプセンター
                 </Link>
               </Button>
             </CardContent>

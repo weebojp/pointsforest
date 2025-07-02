@@ -1,8 +1,10 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
+import { authMetrics } from './performance-monitor'
+import { cacheHelpers, clientCache } from './cache'
 import type { UserProfile } from '@/types/user'
 
 interface AuthContextType {
@@ -27,17 +29,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
+      authMetrics.startSessionCheck()
       try {
         const { data: { session } } = await supabase.auth.getSession()
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
+          // プロフィール取得を並列化せず、必要な時のみ実行
           await fetchProfile(session.user.id)
         }
       } catch (error) {
         console.error('Error getting initial session:', error)
       } finally {
+        authMetrics.endSessionCheck()
         setLoading(false)
       }
     }
@@ -53,6 +58,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (session?.user) {
           await fetchProfile(session.user.id)
+          // ログイン完了時にメトリクス終了
+          if (event === 'SIGNED_IN') {
+            authMetrics.endLogin()
+          }
         } else {
           setProfile(null)
         }
@@ -64,10 +73,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
+    authMetrics.startProfileFetch(userId)
+    
     try {
+      // キャッシュから取得を試行
+      const cachedProfile = cacheHelpers.getProfile(userId) as UserProfile | null
+      if (cachedProfile) {
+        console.log('Profile loaded from cache:', userId)
+        setProfile(cachedProfile)
+        authMetrics.endProfileFetch()
+        return
+      }
+      
       console.log('Fetching profile for user:', userId)
       
+      // 最適化: すべてのフィールドを選択（型安全性のため）
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -80,18 +101,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // プロフィールが存在しない場合は作成を試行
         if (error.code === 'PGRST116') {
           console.log('Profile not found, will be created by trigger or manually')
+          // 短い遅延後に再試行
+          setTimeout(() => fetchProfile(userId), 1000)
         }
+        authMetrics.endProfileFetch()
         return
       }
 
       console.log('Profile fetched:', data)
       setProfile(data)
+      
+      // キャッシュに保存
+      cacheHelpers.setProfile(userId, data)
+      
     } catch (error) {
       console.error('Error in fetchProfile:', error)
+    } finally {
+      authMetrics.endProfileFetch()
     }
-  }
+  }, [])
 
   const signIn = async (email: string, password: string) => {
+    authMetrics.startLogin()
     try {
       console.log('Attempting sign in for:', email)
       
@@ -102,13 +133,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('Sign in error:', error)
+        authMetrics.endLogin()
+        return { error }
       } else {
         console.log('Sign in successful')
+        // ログイン成功時のメトリクスは onAuthStateChange で終了
+        return { error: null }
       }
-      
-      return { error }
     } catch (error) {
       console.error('Sign in exception:', error)
+      authMetrics.endLogin()
       return { error }
     }
   }
@@ -189,6 +223,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
+      // ログアウト前にユーザー関連のキャッシュをクリア
+      if (user) {
+        clientCache.clearUserCache(user.id)
+      }
+      
       await supabase.auth.signOut()
       setProfile(null)
     } catch (error) {
