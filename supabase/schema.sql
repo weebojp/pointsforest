@@ -586,3 +586,262 @@ INSERT INTO leaderboards (name, type, period, max_entries) VALUES
 ('レベルランキング', 'level', 'all_time', 100),
 ('ログインストリークランキング', 'streak', 'all_time', 50)
 ON CONFLICT DO NOTHING;
+
+-- ====================================
+-- AVATAR SYSTEM TABLES (Phase 2.5)
+-- ====================================
+
+-- Avatar frames table
+CREATE TABLE IF NOT EXISTS avatar_frames (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('bronze', 'silver', 'gold', 'rainbow')),
+  price INTEGER NOT NULL CHECK (price >= 0),
+  rarity TEXT NOT NULL CHECK (rarity IN ('common', 'rare', 'epic', 'legendary')),
+  css_class TEXT NOT NULL,
+  unlock_requirement TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- User avatar frames ownership
+CREATE TABLE IF NOT EXISTS user_avatar_frames (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  frame_id UUID REFERENCES avatar_frames(id) ON DELETE CASCADE,
+  is_equipped BOOLEAN DEFAULT FALSE,
+  purchased_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, frame_id)
+);
+
+-- Avatar accessories table
+CREATE TABLE IF NOT EXISTS avatar_accessories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  category TEXT NOT NULL CHECK (category IN ('hat', 'glasses', 'decoration', 'badge')),
+  price INTEGER NOT NULL CHECK (price >= 0),
+  image_url TEXT,
+  position_x INTEGER DEFAULT 0,
+  position_y INTEGER DEFAULT 0,
+  rarity TEXT NOT NULL CHECK (rarity IN ('common', 'rare', 'epic', 'legendary')),
+  is_active BOOLEAN DEFAULT TRUE,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- User avatar accessories ownership
+CREATE TABLE IF NOT EXISTS user_avatar_accessories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  accessory_id UUID REFERENCES avatar_accessories(id) ON DELETE CASCADE,
+  is_equipped BOOLEAN DEFAULT FALSE,
+  purchased_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, accessory_id)
+);
+
+-- Shop items table
+CREATE TABLE IF NOT EXISTS shop_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL CHECK (category IN ('virtual', 'real_world', 'premium', 'limited')),
+  subcategory TEXT,
+  
+  -- Pricing & Stock
+  price INTEGER NOT NULL CHECK (price >= 0),
+  original_price INTEGER CHECK (original_price >= 0),
+  stock INTEGER CHECK (stock >= 0), -- NULL = unlimited
+  
+  -- Requirements
+  level_requirement INTEGER CHECK (level_requirement >= 1),
+  premium_only BOOLEAN DEFAULT FALSE,
+  time_restricted_start TIMESTAMPTZ,
+  time_restricted_end TIMESTAMPTZ,
+  
+  -- Metadata
+  image_url TEXT,
+  rarity TEXT CHECK (rarity IN ('common', 'rare', 'epic', 'legendary')),
+  tags JSONB DEFAULT '[]',
+  is_popular BOOLEAN DEFAULT FALSE,
+  is_featured BOOLEAN DEFAULT FALSE,
+  is_new BOOLEAN DEFAULT FALSE,
+  is_active BOOLEAN DEFAULT TRUE,
+  
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Purchase history table
+CREATE TABLE IF NOT EXISTS purchases (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  item_id UUID REFERENCES shop_items(id) ON DELETE SET NULL,
+  
+  -- Purchase details
+  item_name TEXT NOT NULL,
+  quantity INTEGER DEFAULT 1 CHECK (quantity > 0),
+  unit_price INTEGER NOT NULL CHECK (unit_price >= 0),
+  total_price INTEGER NOT NULL CHECK (total_price >= 0),
+  
+  -- Status
+  status TEXT NOT NULL DEFAULT 'completed' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
+  
+  -- Shipping info (for real items)
+  shipping_info JSONB,
+  tracking_number TEXT,
+  delivered_at TIMESTAMPTZ,
+  
+  -- References
+  transaction_id UUID REFERENCES point_transactions(id) ON DELETE SET NULL,
+  
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Slot machine results table
+CREATE TABLE IF NOT EXISTS slot_results (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  game_session_id UUID REFERENCES game_sessions(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  
+  -- Slot results
+  reel_1 TEXT NOT NULL,
+  reel_2 TEXT NOT NULL,
+  reel_3 TEXT NOT NULL,
+  combination_type TEXT,
+  multiplier DECIMAL(5,2) DEFAULT 1.0,
+  base_points INTEGER NOT NULL CHECK (base_points >= 0),
+  bonus_points INTEGER DEFAULT 0 CHECK (bonus_points >= 0),
+  
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Update users table for avatar system
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_frame_id UUID REFERENCES avatar_frames(id);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_accessories JSONB DEFAULT '[]';
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_user_avatar_frames_user_id ON user_avatar_frames(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_avatar_frames_equipped ON user_avatar_frames(user_id, is_equipped) WHERE is_equipped = TRUE;
+CREATE INDEX IF NOT EXISTS idx_user_avatar_accessories_user_id ON user_avatar_accessories(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_avatar_accessories_equipped ON user_avatar_accessories(user_id, is_equipped) WHERE is_equipped = TRUE;
+CREATE INDEX IF NOT EXISTS idx_shop_items_category ON shop_items(category, is_active) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_shop_items_featured ON shop_items(is_featured, is_active) WHERE is_featured = TRUE AND is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_purchases_user_id ON purchases(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_slot_results_user_id ON slot_results(user_id, created_at DESC);
+
+-- Insert default avatar frames
+INSERT INTO avatar_frames (name, type, price, rarity, css_class, sort_order) VALUES
+('シンプル銅フレーム', 'bronze', 500, 'common', 'avatar-frame-bronze', 1),
+('シルバーフレーム', 'silver', 2000, 'rare', 'avatar-frame-silver', 2),
+('ゴールドフレーム', 'gold', 5000, 'epic', 'avatar-frame-gold', 3),
+('レインボーフレーム', 'rainbow', 15000, 'legendary', 'avatar-frame-rainbow', 4)
+ON CONFLICT DO NOTHING;
+
+-- Insert sample shop items
+INSERT INTO shop_items (name, description, category, subcategory, price, rarity, is_featured, sort_order) VALUES
+('ベーシックハット', 'おしゃれな帽子でアバターを飾ろう', 'virtual', 'accessory', 200, 'common', FALSE, 1),
+('スタイリッシュグラス', 'クールなサングラス', 'virtual', 'accessory', 500, 'rare', TRUE, 2),
+('ゲームブースト(24h)', '24時間ポイント2倍', 'virtual', 'boost', 1000, 'rare', TRUE, 3),
+('Amazonギフトカード 500円', 'Amazon.co.jpで使えるギフトカード', 'real_world', 'gift_card', 50000, 'epic', TRUE, 4)
+ON CONFLICT DO NOTHING;
+
+-- Avatar system database functions
+CREATE OR REPLACE FUNCTION equip_avatar_frame(
+  p_user_id UUID,
+  p_frame_id UUID
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_ownership_exists BOOLEAN;
+BEGIN
+  -- Check if user owns the frame
+  SELECT EXISTS(
+    SELECT 1 FROM user_avatar_frames 
+    WHERE user_id = p_user_id AND frame_id = p_frame_id
+  ) INTO v_ownership_exists;
+  
+  IF NOT v_ownership_exists THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Frame not owned');
+  END IF;
+  
+  -- Unequip all frames for user
+  UPDATE user_avatar_frames 
+  SET is_equipped = FALSE 
+  WHERE user_id = p_user_id;
+  
+  -- Equip the selected frame
+  UPDATE user_avatar_frames 
+  SET is_equipped = TRUE 
+  WHERE user_id = p_user_id AND frame_id = p_frame_id;
+  
+  -- Update user's avatar_frame_id
+  UPDATE users 
+  SET avatar_frame_id = p_frame_id, updated_at = NOW()
+  WHERE id = p_user_id;
+  
+  RETURN jsonb_build_object('success', true);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION purchase_avatar_frame(
+  p_user_id UUID,
+  p_frame_id UUID
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_frame RECORD;
+  v_user_points INTEGER;
+  v_already_owned BOOLEAN;
+BEGIN
+  -- Get frame info
+  SELECT * INTO v_frame FROM avatar_frames WHERE id = p_frame_id AND is_active = TRUE;
+  
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Frame not found');
+  END IF;
+  
+  -- Check if already owned
+  SELECT EXISTS(
+    SELECT 1 FROM user_avatar_frames 
+    WHERE user_id = p_user_id AND frame_id = p_frame_id
+  ) INTO v_already_owned;
+  
+  IF v_already_owned THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Frame already owned');
+  END IF;
+  
+  -- Check user points
+  SELECT points INTO v_user_points FROM users WHERE id = p_user_id;
+  
+  IF v_user_points < v_frame.price THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Insufficient points');
+  END IF;
+  
+  -- Deduct points
+  UPDATE users 
+  SET points = points - v_frame.price, updated_at = NOW()
+  WHERE id = p_user_id;
+  
+  -- Record transaction
+  INSERT INTO point_transactions (user_id, amount, type, source, description)
+  VALUES (p_user_id, -v_frame.price, 'spend', 'avatar_frame', 
+    FORMAT('Purchased avatar frame: %s', v_frame.name));
+  
+  -- Grant ownership
+  INSERT INTO user_avatar_frames (user_id, frame_id)
+  VALUES (p_user_id, p_frame_id);
+  
+  RETURN jsonb_build_object('success', true, 'frame_id', p_frame_id);
+END;
+$$;

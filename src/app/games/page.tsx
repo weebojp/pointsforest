@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth-provider'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trees, Gamepad2, ArrowLeft, Clock, Target, Zap } from 'lucide-react'
+import { Trees, Gamepad2, ArrowLeft, Clock, Target, Zap, Coins } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import type { Game } from '@/types/user'
@@ -13,6 +13,7 @@ import type { Game } from '@/types/user'
 // Lazy load game components for better performance
 const NumberGuessingGame = lazy(() => import('@/components/features/games/NumberGuessingGame').then(module => ({ default: module.NumberGuessingGame })))
 const RouletteGame = lazy(() => import('@/components/features/games/RouletteGame').then(module => ({ default: module.RouletteGame })))
+const SlotMachineGame = lazy(() => import('@/components/features/games/SlotMachineGame'))
 
 export default function GamesPage() {
   const { user, loading: authLoading } = useAuth()
@@ -96,6 +97,8 @@ export default function GamesPage() {
         return <Target className="h-6 w-6" />
       case 'roulette':
         return <Zap className="h-6 w-6" />
+      case 'slot_machine':
+        return <Coins className="h-6 w-6" />
       default:
         return <Gamepad2 className="h-6 w-6" />
     }
@@ -150,6 +153,10 @@ export default function GamesPage() {
                 game={selectedGame} 
                 onComplete={onGameComplete}
               />
+            )}
+
+            {selectedGame.type === 'slot_machine' && (
+              <SlotMachineGame />
             )}
           </Suspense>
         </div>
@@ -253,6 +260,40 @@ export default function GamesPage() {
             })}
           </div>
         )}
+
+        {/* Standalone Slot Machine */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Coins className="h-6 w-6 text-yellow-500" />
+            🎰 スペシャルゲーム
+          </h2>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-1 gap-6">
+            <Card className="bg-gradient-to-br from-yellow-50 to-amber-100 border-yellow-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  🎰 森のスロット
+                  <span className="text-sm bg-yellow-500 text-white px-2 py-1 rounded-full">
+                    NEW!
+                  </span>
+                </CardTitle>
+                <CardDescription>
+                  運試しのスロットマシン！3つ揃えて大当たりを狙おう！
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Suspense fallback={
+                  <div className="flex items-center justify-center py-8">
+                    <Trees className="h-6 w-6 text-green-600 animate-pulse mr-2" />
+                    <span className="text-gray-600">読み込み中...</span>
+                  </div>
+                }>
+                  <SlotMachineGame />
+                </Suspense>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Game Instructions */}
         <Card className="mt-8">

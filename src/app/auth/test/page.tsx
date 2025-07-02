@@ -69,9 +69,10 @@ export default function TestPage() {
         results.push(`✅ Health Check Response: ${JSON.stringify(data)}`)
       }
     } catch (e) {
-      results.push(`❌ Direct API Error: ${e}`)
-      results.push(`Error Type: ${e.constructor.name}`)
-      if (e instanceof TypeError) {
+      const error = e as Error
+      results.push(`❌ Direct API Error: ${error.message || error}`)
+      results.push(`Error Type: ${error.constructor?.name || 'Unknown'}`)
+      if (error instanceof TypeError) {
         results.push('This appears to be a network/CORS issue')
       }
     }
@@ -108,8 +109,9 @@ export default function TestPage() {
         results.push(`✅ Signup successful for: ${testEmail}`)
       }
     } catch (e) {
-      results.push(`❌ Signup Exception: ${e}`)
-      results.push(`Error Type: ${e.constructor.name}`)
+      const error = e as Error
+      results.push(`❌ Signup Exception: ${error.message || error}`)
+      results.push(`Error Type: ${error.constructor?.name || 'Unknown'}`)
     }
 
     setTestResults(results)

@@ -27,7 +27,8 @@ export default function DebugPage() {
       const data = await response.json()
       setResult(data)
     } catch (error) {
-      setResult({ error: error.message })
+      const err = error as Error
+      setResult({ error: err.message || 'Unknown error' })
     }
     setLoading(false)
   }
@@ -49,7 +50,8 @@ export default function DebugPage() {
       const data = await response.json()
       setResult(data)
     } catch (error) {
-      setResult({ error: error.message })
+      const err = error as Error
+      setResult({ error: err.message || 'Unknown error' })
     }
     setLoading(false)
   }
