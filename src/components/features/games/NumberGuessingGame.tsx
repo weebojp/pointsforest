@@ -65,10 +65,10 @@ export function NumberGuessingGame({ game, onComplete }: NumberGuessingGameProps
       })
 
       if (error) {
-        console.error('Game session error:', error)
+        console.error('Game session error:', error.message || error)
         toast({
           title: 'エラー',
-          description: 'ゲーム結果の保存に失敗しました',
+          description: `ゲーム結果の保存に失敗しました: ${error.message || 'Unknown error'}`,
           variant: 'destructive'
         })
         setGameState(prev => ({ ...prev, status: 'playing' }))

@@ -1,16 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense, lazy } from 'react'
 import { useAuth } from '@/lib/auth-provider'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Trees, Gamepad2, ArrowLeft, Clock, Target, Zap } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { NumberGuessingGame } from '@/components/features/games/NumberGuessingGame'
-import { RouletteGame } from '@/components/features/games/RouletteGame'
 import Link from 'next/link'
 import type { Game } from '@/types/user'
+
+// Lazy load game components for better performance
+const NumberGuessingGame = lazy(() => import('@/components/features/games/NumberGuessingGame').then(module => ({ default: module.NumberGuessingGame })))
+const RouletteGame = lazy(() => import('@/components/features/games/RouletteGame').then(module => ({ default: module.RouletteGame })))
 
 export default function GamesPage() {
   const { user, loading: authLoading } = useAuth()
@@ -130,19 +132,26 @@ export default function GamesPage() {
             </Button>
           </div>
 
-          {selectedGame.type === 'number_guess' && (
-            <NumberGuessingGame 
-              game={selectedGame} 
-              onComplete={onGameComplete}
-            />
-          )}
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-12">
+              <Trees className="h-8 w-8 text-green-600 animate-pulse mr-2" />
+              <span className="text-gray-600">ゲームを読み込んでいます...</span>
+            </div>
+          }>
+            {selectedGame.type === 'number_guess' && (
+              <NumberGuessingGame 
+                game={selectedGame} 
+                onComplete={onGameComplete}
+              />
+            )}
 
-          {selectedGame.type === 'roulette' && (
-            <RouletteGame 
-              game={selectedGame} 
-              onComplete={onGameComplete}
-            />
-          )}
+            {selectedGame.type === 'roulette' && (
+              <RouletteGame 
+                game={selectedGame} 
+                onComplete={onGameComplete}
+              />
+            )}
+          </Suspense>
         </div>
       </div>
     )

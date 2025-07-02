@@ -2,8 +2,8 @@
 const nextConfig = {
   experimental: {
     typedRoutes: true,
-    serverComponentsExternalPackages: ['@supabase/supabase-js']
   },
+  serverExternalPackages: ['@supabase/supabase-js'],
   images: {
     domains: ['avatar.vercel.sh', 'supabase.co', 'replicate.delivery'],
     formats: ['image/avif', 'image/webp']

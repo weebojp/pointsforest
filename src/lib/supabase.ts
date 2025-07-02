@@ -8,23 +8,42 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+// URLの末尾のスラッシュを削除
+const cleanUrl = supabaseUrl.replace(/\/$/, '')
+
+console.log('Initializing Supabase with URL:', cleanUrl)
+console.log('Supabase Key exists:', !!supabaseAnonKey)
+
+export const supabase = createClient<Database>(cleanUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
   },
-  realtime: {
-    params: {
-      eventsPerSecond: 10
-    }
-  }
+  global: {
+    headers: {
+      'x-application-name': 'points-forest',
+    },
+  },
 })
+
+// Test connection on initialization
+if (typeof window !== 'undefined') {
+  supabase.auth.getSession().then(({ data, error }) => {
+    if (error) {
+      console.error('Supabase initialization error:', error)
+    } else {
+      console.log('Supabase initialized successfully')
+    }
+  })
+}
 
 // Server-side Supabase client for API routes
 export const createServerSupabaseClient = () => {
   return createClient<Database>(
-    supabaseUrl,
+    cleanUrl,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       auth: {
