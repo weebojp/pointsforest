@@ -9,6 +9,7 @@ import { Trees, Gamepad2, ArrowLeft, Clock, Target, Zap, Coins } from 'lucide-re
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import type { Game } from '@/types/user'
+import { AppHeader } from '@/components/layout/AppHeader'
 
 // Lazy load game components for better performance
 const NumberGuessingGame = lazy(() => import('@/components/features/games/NumberGuessingGame').then(module => ({ default: module.NumberGuessingGame })))
@@ -166,28 +167,12 @@ export default function GamesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Trees className="h-8 w-8 text-green-600 mr-3" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">ゲーム一覧</h1>
-                <p className="text-sm text-gray-600">
-                  ミニゲームでポイントを獲得しよう！
-                </p>
-              </div>
-            </div>
-            <Button asChild variant="outline">
-              <Link href="/dashboard">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                ダッシュボード
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader 
+        showBreadcrumb={true}
+        breadcrumbItems={[
+          { label: 'ゲーム一覧', icon: Gamepad2 }
+        ]}
+      />
 
       <div className="container mx-auto px-4 py-8">
         {games.length === 0 ? (

@@ -13,7 +13,7 @@ interface PerformanceMetric {
 
 class PerformanceMonitor {
   private metrics: Map<string, PerformanceMetric> = new Map()
-  private isEnabled = typeof window !== 'undefined' && process.env.NODE_ENV === 'development'
+  private isEnabled = false // Temporarily disabled to prevent error spam
 
   start(name: string, metadata?: Record<string, any>) {
     if (!this.isEnabled) return

@@ -68,18 +68,24 @@ export default function SlotMachineGame() {
     try {
       const today = new Date().toISOString().split('T')[0]
       
+      // Count slot machine transactions today as a simple alternative
       const { data, error } = await supabase
-        .from('game_sessions')
+        .from('point_transactions')
         .select('id')
         .eq('user_id', user.id)
+        .eq('source', 'slot_machine')
         .gte('created_at', today)
-        .like('metadata->gameType', 'slot_machine')
 
-      if (error) throw error
+      if (error) {
+        console.error('Database error fetching plays:', error)
+        setPlaysToday(0)
+        return
+      }
 
       setPlaysToday(data?.length || 0)
     } catch (error) {
       console.error('Error fetching plays today:', error)
+      setPlaysToday(0)
     } finally {
       setLoading(false)
     }
@@ -181,41 +187,24 @@ export default function SlotMachineGame() {
       // Wait for animations to complete
       setTimeout(async () => {
         try {
-          // Save game session
-          const { data: sessionData, error: sessionError } = await supabase
-            .from('game_sessions')
+          // Create simple point transaction instead of complex game session
+          const { error: transactionError } = await supabase
+            .from('point_transactions')
             .insert({
               user_id: user.id,
-              game_id: null, // We'll need to get the slot machine game ID
-              score: gameResult.multiplier,
-              points_earned: gameResult.pointsEarned,
-              duration_seconds: 2,
+              amount: gameResult.pointsEarned,
+              type: 'earn',
+              source: 'slot_machine',
+              description: `スロットマシン: ${gameResult.message}`,
               metadata: {
-                gameType: 'slot_machine',
                 symbols: newSymbols,
                 combination: gameResult.combination,
                 multiplier: gameResult.multiplier
               }
             })
-            .select()
-            .single()
 
-          if (sessionError) throw sessionError
-
-          // Save slot-specific result
-          if (sessionData) {
-            await supabase
-              .from('slot_results')
-              .insert({
-                game_session_id: sessionData.id,
-                user_id: user.id,
-                reel_1: newSymbols[0],
-                reel_2: newSymbols[1],
-                reel_3: newSymbols[2],
-                combination_type: gameResult.combination,
-                multiplier: gameResult.multiplier,
-                base_points: gameResult.pointsEarned
-              })
+          if (transactionError) {
+            console.warn('Transaction save failed:', transactionError)
           }
 
           // Update user points
@@ -227,16 +216,6 @@ export default function SlotMachineGame() {
             })
             .eq('id', user.id)
 
-          // Record point transaction
-          await supabase
-            .from('point_transactions')
-            .insert({
-              user_id: user.id,
-              amount: gameResult.pointsEarned,
-              type: 'earn',
-              source: 'slot_machine',
-              description: `スロットマシン: ${gameResult.message}`
-            })
 
           setResult(gameResult)
           setPlaysToday(prev => prev + 1)

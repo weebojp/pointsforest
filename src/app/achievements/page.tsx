@@ -11,6 +11,7 @@ import { Trees, Trophy, ArrowLeft, Star, TrendingUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { AchievementCard } from '@/components/features/achievements/AchievementCard'
 import Link from 'next/link'
+import { AppHeader } from '@/components/layout/AppHeader'
 
 interface Achievement {
   id: string
@@ -171,28 +172,12 @@ export default function AchievementsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Trees className="h-8 w-8 text-green-600 mr-3" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">アチーブメント</h1>
-                <p className="text-sm text-gray-600">
-                  実績を達成してポイントを獲得しよう！
-                </p>
-              </div>
-            </div>
-            <Button asChild variant="outline">
-              <Link href="/dashboard">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                ダッシュボード
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader 
+        showBreadcrumb={true}
+        breadcrumbItems={[
+          { label: 'アチーブメント', icon: Trophy }
+        ]}
+      />
 
       <div className="container mx-auto px-4 py-8">
         {/* Stats Cards */}
