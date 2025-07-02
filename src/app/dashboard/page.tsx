@@ -17,7 +17,8 @@ import {
   LogOut,
   HelpCircle,
   Settings,
-  User
+  User,
+  Droplets
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
@@ -376,20 +377,20 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="game-card-hover">
+          <Card className="game-card-hover spring-container">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <HelpCircle className="h-5 w-5 mr-2 text-purple-600" />
-                ヘルプ
+                <Droplets className="h-5 w-5 mr-2 text-blue-600" />
+                ラッキースプリング
               </CardTitle>
               <CardDescription>
-                使い方やよくある質問を確認
+                神秘的な泉を訪れて運命の恵みを受け取ろう
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/help">
-                  ヘルプセンター
+              <Button asChild className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white">
+                <Link href="/springs">
+                  泉を訪れる
                 </Link>
               </Button>
             </CardContent>
