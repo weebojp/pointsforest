@@ -1,0 +1,472 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 142 86% 28%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 142 86% 28%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 142 86% 28%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 142 86% 28%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom forest theme colors */
+.forest-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+}
+
+.points-glow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  color: #10b981;
+}
+
+/* Game animations */
+.game-card-hover {
+  transition: all 0.3s ease;
+}
+
+.game-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
+}
+
+/* Achievement badge glow */
+.achievement-glow {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Roulette spinning animation */
+@keyframes roulette-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(3600deg); }
+}
+
+.roulette-wheel {
+  animation: roulette-spin 3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Avatar Frame Styles */
+.avatar-frame-bronze {
+  border: 3px solid #cd7f32 !important;
+  box-shadow: 0 0 10px rgba(205, 127, 50, 0.3);
+  background: linear-gradient(135deg, #cd7f32 0%, #b8860b 100%);
+}
+
+.avatar-frame-silver {
+  border: 3px solid #c0c0c0 !important;
+  box-shadow: 0 0 15px rgba(192, 192, 192, 0.5);
+  background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
+  animation: silver-shine 2s ease-in-out infinite;
+}
+
+.avatar-frame-gold {
+  border: 3px solid #ffd700 !important;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+  animation: gold-pulse 1.5s ease-in-out infinite;
+}
+
+.avatar-frame-rainbow {
+  border: 3px solid transparent !important;
+  background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+  background-size: 400% 400%;
+  animation: rainbow-flow 3s ease infinite;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+}
+
+/* Frame animations */
+@keyframes silver-shine {
+  0%, 100% { 
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.5);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(192, 192, 192, 0.8);
+  }
+}
+
+@keyframes gold-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes rainbow-flow {
+  0% { 
+    background-position: 0% 50%;
+  }
+  50% { 
+    background-position: 100% 50%;
+  }
+  100% { 
+    background-position: 0% 50%;
+  }
+}
+
+/* Avatar preview container */
+.avatar-preview {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-preview .avatar-base {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 3rem;
+  font-weight: bold;
+  position: relative;
+  z-index: 1;
+}
+
+.avatar-preview .frame-overlay {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Rarity indicators */
+.rarity-common {
+  @apply text-gray-600 bg-gray-100;
+}
+
+.rarity-rare {
+  @apply text-blue-600 bg-blue-100;
+}
+
+.rarity-epic {
+  @apply text-purple-600 bg-purple-100;
+}
+
+.rarity-legendary {
+  @apply text-yellow-600 bg-yellow-100;
+}
+
+/* ====================================
+ * LUCKY SPRINGS ANIMATIONS
+ * ====================================*/
+
+/* Water ripple animation */
+@keyframes water-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.water-ripple {
+  animation: water-ripple 2s ease-out infinite;
+}
+
+/* Water drop falling animation */
+@keyframes water-drop {
+  0% {
+    transform: translateY(-20px) scale(0);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(-10px) scale(0.5);
+    opacity: 0.7;
+  }
+  90% {
+    transform: translateY(100px) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(120px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.water-drop {
+  animation: water-drop 3s ease-in infinite;
+}
+
+/* Bubble floating animation */
+@keyframes bubble-float {
+  0% {
+    transform: translateY(100px) scale(0);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(80px) scale(0.6);
+    opacity: 0.8;
+  }
+  80% {
+    transform: translateY(-20px) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-40px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.bubble-float {
+  animation: bubble-float 4s ease-out infinite;
+}
+
+/* Spring glow effect */
+@keyframes spring-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+  }
+}
+
+.spring-glow {
+  animation: spring-glow 3s ease-in-out infinite;
+}
+
+/* Mystical sparkle animation */
+@keyframes mystical-sparkle {
+  0%, 100% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(0.5) rotate(90deg);
+    opacity: 0.8;
+  }
+  80% {
+    transform: scale(1) rotate(270deg);
+    opacity: 1;
+  }
+}
+
+.mystical-sparkle {
+  animation: mystical-sparkle 2s ease-in-out infinite;
+}
+
+/* Forest theme - leaves falling */
+@keyframes leaf-fall {
+  0% {
+    transform: translateY(-20px) translateX(0px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(120px) translateX(30px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.leaf-fall {
+  animation: leaf-fall 4s ease-in infinite;
+}
+
+/* Rainbow theme - color shift */
+@keyframes rainbow-shift {
+  0% { filter: hue-rotate(0deg); }
+  25% { filter: hue-rotate(90deg); }
+  50% { filter: hue-rotate(180deg); }
+  75% { filter: hue-rotate(270deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.rainbow-shift {
+  animation: rainbow-shift 4s linear infinite;
+}
+
+/* Spring visit success animation */
+@keyframes spring-success {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.1);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.spring-success {
+  animation: spring-success 0.6s ease-out;
+}
+
+/* Floating points animation */
+@keyframes floating-points {
+  0% {
+    transform: translateY(0px) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-10px) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+.floating-points {
+  animation: floating-points 2s ease-out forwards;
+}
+
+/* Spring themes */
+.spring-theme-water {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.1) 0%, 
+    rgba(34, 197, 94, 0.1) 50%, 
+    rgba(6, 182, 212, 0.1) 100%);
+}
+
+.spring-theme-forest {
+  background: linear-gradient(135deg, 
+    rgba(34, 197, 94, 0.1) 0%, 
+    rgba(21, 128, 61, 0.1) 50%, 
+    rgba(22, 163, 74, 0.1) 100%);
+}
+
+.spring-theme-mystic {
+  background: linear-gradient(135deg, 
+    rgba(147, 51, 234, 0.1) 0%, 
+    rgba(219, 39, 119, 0.1) 50%, 
+    rgba(168, 85, 247, 0.1) 100%);
+}
+
+.spring-theme-rainbow {
+  background: linear-gradient(135deg, 
+    rgba(251, 191, 36, 0.1) 0%, 
+    rgba(239, 68, 68, 0.1) 25%,
+    rgba(147, 51, 234, 0.1) 50%,
+    rgba(59, 130, 246, 0.1) 75%,
+    rgba(34, 197, 94, 0.1) 100%);
+}
+
+/* Interactive spring container */
+.spring-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.spring-container:hover {
+  transform: translateY(-2px);
+}
+
+.spring-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.spring-container:hover::before {
+  opacity: 1;
+}
+
+/* Tier reward animations */
+.tier-common { 
+  color: #6b7280; 
+  text-shadow: 0 0 5px rgba(107, 114, 128, 0.3);
+}
+
+.tier-rare { 
+  color: #3b82f6; 
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+
+.tier-epic { 
+  color: #8b5cf6; 
+  text-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+}
+
+.tier-legendary { 
+  color: #f59e0b; 
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.tier-mythical { 
+  background: linear-gradient(45deg, #8b5cf6, #ec4899, #f59e0b);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 25px rgba(139, 92, 246, 0.8);
+  animation: rainbow-shift 3s linear infinite;
+}
