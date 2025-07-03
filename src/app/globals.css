@@ -470,3 +470,143 @@
   text-shadow: 0 0 25px rgba(139, 92, 246, 0.8);
   animation: rainbow-shift 3s linear infinite;
 }
+
+/* ====================================
+ * RANK & LEVEL SYSTEM ANIMATIONS
+ * ====================================*/
+
+/* Level up animation */
+@keyframes float-up {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+.animate-float-up {
+  animation: float-up 3s ease-out forwards;
+}
+
+/* Rank glow animations */
+@keyframes bronze-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(205, 127, 50, 0.6);
+  }
+}
+
+@keyframes silver-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(192, 192, 192, 0.7);
+  }
+}
+
+@keyframes gold-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.8);
+  }
+}
+
+@keyframes platinum-glow {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(229, 228, 226, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(229, 228, 226, 0.9);
+  }
+}
+
+@keyframes diamond-glow {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(185, 242, 255, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(185, 242, 255, 1);
+  }
+}
+
+.rank-bronze-glow {
+  animation: bronze-glow 2s ease-in-out infinite;
+}
+
+.rank-silver-glow {
+  animation: silver-glow 2s ease-in-out infinite;
+}
+
+.rank-gold-glow {
+  animation: gold-glow 2s ease-in-out infinite;
+}
+
+.rank-platinum-glow {
+  animation: platinum-glow 2s ease-in-out infinite;
+}
+
+.rank-diamond-glow {
+  animation: diamond-glow 2s ease-in-out infinite;
+}
+
+/* Experience bar animation */
+@keyframes exp-fill {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: var(--progress-width);
+  }
+}
+
+.exp-progress {
+  animation: exp-fill 1.5s ease-out;
+}
+
+/* Level up burst effect */
+@keyframes level-burst {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.level-burst {
+  animation: level-burst 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Rank badge pulse */
+@keyframes rank-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.rank-pulse {
+  animation: rank-pulse 2s ease-in-out infinite;
+}

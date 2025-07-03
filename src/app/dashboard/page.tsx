@@ -20,7 +20,8 @@ import {
   User,
   Droplets,
   Target,
-  Package
+  Package,
+  Users
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
@@ -285,7 +286,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-7 gap-6 mb-8">
           <Card className="game-card-hover">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -395,6 +396,25 @@ export default function DashboardPage() {
               <Button asChild className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white">
                 <Link href="/springs">
                   泉を訪れる
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="game-card-hover">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Users className="h-5 w-5 mr-2 text-indigo-600" />
+                ソーシャル
+              </CardTitle>
+              <CardDescription>
+                フレンドと交流してギルドに参加しよう
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white">
+                <Link href="/social">
+                  コミュニティ
                 </Link>
               </Button>
             </CardContent>
