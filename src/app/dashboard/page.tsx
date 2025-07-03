@@ -18,7 +18,9 @@ import {
   HelpCircle,
   Settings,
   User,
-  Droplets
+  Droplets,
+  Target,
+  Package
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
@@ -283,7 +285,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           <Card className="game-card-hover">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -336,6 +338,44 @@ export default function DashboardPage() {
               <Button asChild variant="outline" className="w-full">
                 <Link href="/leaderboard">
                   ランキング
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="game-card-hover">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Target className="h-5 w-5 mr-2 text-purple-600" />
+                クエスト
+              </CardTitle>
+              <CardDescription>
+                デイリーミッションをクリアしてポイントを稼ごう
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/quests">
+                  クエストを見る
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="game-card-hover">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Package className="h-5 w-5 mr-2 text-pink-600" />
+                ガチャ
+              </CardTitle>
+              <CardDescription>
+                運試しでレアアイテムを手に入れよう
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white">
+                <Link href="/gacha">
+                  ガチャを引く
                 </Link>
               </Button>
             </CardContent>
