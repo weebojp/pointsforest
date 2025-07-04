@@ -64,6 +64,18 @@ export function AppHeader({ currentPage, showBreadcrumb = false, breadcrumbItems
                 </Link>
               </Button>
               <Button asChild variant="outline" size="sm">
+                <Link href="/quests">
+                  <span className="h-4 w-4 mr-2">🎯</span>
+                  クエスト
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/social">
+                  <span className="h-4 w-4 mr-2">👥</span>
+                  ソーシャル
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
                 <Link href="/springs">
                   <span className="h-4 w-4 mr-2">💧</span>
                   泉

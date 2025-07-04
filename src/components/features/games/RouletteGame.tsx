@@ -31,7 +31,7 @@ export function RouletteGame({ game, onComplete }: RouletteGameProps) {
   const { toast } = useToast()
   
   // Parse game config to get segments
-  const segments: RouletteSegment[] = game.config?.segments || [
+  const defaultSegments: RouletteSegment[] = [
     { id: 0, label: '5pt', points: 5, probability: 0.4, color: '#10b981' },
     { id: 1, label: '10pt', points: 10, probability: 0.25, color: '#3b82f6' },
     { id: 2, label: '25pt', points: 25, probability: 0.15, color: '#8b5cf6' },
@@ -41,6 +41,10 @@ export function RouletteGame({ game, onComplete }: RouletteGameProps) {
     { id: 6, label: '500pt', points: 500, probability: 0.015, color: '#6366f1' },
     { id: 7, label: '1000pt', points: 1000, probability: 0.005, color: '#dc2626' }
   ]
+  
+  const segments: RouletteSegment[] = Array.isArray(game.config?.segments) 
+    ? game.config.segments 
+    : defaultSegments
 
   const [gameState, setGameState] = useState<GameState>({
     status: 'ready',

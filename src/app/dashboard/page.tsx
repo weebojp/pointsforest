@@ -363,6 +363,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
+          {/* ガチャ機能は法的理由により一時的に無効化
           <Card className="game-card-hover">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -381,6 +382,7 @@ export default function DashboardPage() {
               </Button>
             </CardContent>
           </Card>
+          */}
 
           <Card className="game-card-hover spring-container">
             <CardHeader>
