@@ -4,12 +4,12 @@ export async function GET() {
   try {
     const tests = []
 
-    // Test 1: Basic connectivity
+    // Test 1: Basic connectivity and user count
     try {
       const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select('count')
-        .limit(1)
+        .select('id, email, username, points')
+        .limit(5)
 
       tests.push({
         name: 'Users table',
@@ -109,7 +109,28 @@ export async function GET() {
       })
     }
 
-    // Test 6: Check user_items table exists
+    // Test 6: Check gacha_pulls table exists
+    try {
+      const { data: pullsData, error: pullsError } = await supabase
+        .from('gacha_pulls')
+        .select('*')
+        .limit(1)
+
+      tests.push({
+        name: 'gacha_pulls table',
+        success: !pullsError,
+        error: pullsError?.message,
+        data: pullsData
+      })
+    } catch (e) {
+      tests.push({
+        name: 'gacha_pulls table',
+        success: false,
+        error: e instanceof Error ? e.message : String(e)
+      })
+    }
+
+    // Test 7: Check user_items table exists
     try {
       const { data: userItemsData, error: userItemsError } = await supabase
         .from('user_items')
@@ -130,7 +151,7 @@ export async function GET() {
       })
     }
 
-    // Test 7: Check gacha_pools table exists  
+    // Test 8: Check gacha_pools table exists  
     try {
       const { data: poolsData, error: poolsError } = await supabase
         .from('gacha_pools')
@@ -146,6 +167,28 @@ export async function GET() {
     } catch (e) {
       tests.push({
         name: 'gacha_pools table',
+        success: false,
+        error: e instanceof Error ? e.message : String(e)
+      })
+    }
+
+    // Test 9: Check execute_gacha_pull RPC function
+    try {
+      const { data: rpcData, error: rpcError } = await supabase.rpc('execute_gacha_pull', {
+        p_user_id: '00000000-0000-0000-0000-000000000000', // dummy UUID
+        p_gacha_slug: 'forest-standard',
+        p_pull_count: 1
+      })
+
+      tests.push({
+        name: 'RPC execute_gacha_pull',
+        success: !rpcError,
+        error: rpcError?.message,
+        data: rpcData
+      })
+    } catch (e) {
+      tests.push({
+        name: 'RPC execute_gacha_pull',
         success: false,
         error: e instanceof Error ? e.message : String(e)
       })

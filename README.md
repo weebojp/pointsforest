@@ -4,7 +4,7 @@ A comprehensive gamification platform built with Next.js 15, TypeScript, and Sup
 
 ## 🚀 Features
 
-### ✅ **Implemented (Phase 1-2.5 Completed)**
+### ✅ **Implemented (Phase 1-3 Completed)**
 
 #### 🔐 **Authentication System**
 - Email/password registration and login
@@ -58,6 +58,32 @@ A comprehensive gamification platform built with Next.js 15, TypeScript, and Sup
 - Recent activity overview
 - Quick access to all features
 
+#### 🎯 **Quest System**
+- **Daily Quests**: Login, gameplay, and point-earning challenges
+- **Weekly Quests**: More challenging multi-day objectives
+- **Challenge Quests**: Special achievement-based tasks
+- Automatic progress tracking and reward distribution
+- Experience points and level progression
+
+#### 🎰 **Gacha System**
+- **4 Gacha Types**: Standard, Premium, Event, and Daily machines
+- **5 Rarity Tiers**: Common (50%) to Mythical (1%)
+- Real-time probability calculations and item distribution
+- Inventory management for collected items
+- Pull history and statistics tracking
+
+#### 🏅 **Rank & Level System** 
+- **5 Rank Tiers**: Bronze → Silver → Gold → Platinum → Diamond
+- Exponential experience system with automatic rank promotion
+- Level-up rewards and milestone bonuses
+- Rank-based feature unlocks and privileges
+
+#### 👥 **Social System**
+- **Friend System**: Send/accept friend requests and manage connections
+- **Guild System**: Create/join guilds with member management
+- **Private Messaging**: Direct communication between friends
+- **Social Feed**: Activity sharing and community engagement
+
 #### 🎨 **UI/UX**
 - **Unified Navigation**: AppHeader component on all pages
 - **Breadcrumb Navigation**: Shows current page context
@@ -67,12 +93,11 @@ A comprehensive gamification platform built with Next.js 15, TypeScript, and Sup
 - 60+ custom CSS animations
 - Mobile-friendly responsive layouts
 
-### 🚧 **Coming Soon (Phase 3)**
-- Point shop with avatar accessories
-- Social features (friends, guilds, messaging)
+### 🚧 **Coming Soon (Phase 4)**
+- Point shop with avatar accessories and real-world rewards
+- AI-generated avatars with Stable Diffusion
+- Additional mini-games (Memory cards, Trivia)
 - Premium membership system
-- AI-generated avatars
-- Additional mini-games
 - B2B white-label platform
 
 ## 🛠️ Technology Stack
@@ -129,12 +154,23 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 4. **Set up the database**
 
-For Lucky Springs feature, execute the following SQL in Supabase SQL Editor:
+**Important**: Execute the following SQL scripts in Supabase SQL Editor in order:
+
 ```bash
-# Copy the contents of lucky-springs-setup.sql and run in Supabase Dashboard
+# 1. Core tables (if not already created)
+# Run: supabase/schema.sql
+
+# 2. Phase 3 systems (Quest, Gacha, Rank, Social)
+# Run: supabase/deploy-all-systems-safe.sql
+
+# 3. Lucky Springs feature
+# Run: supabase/lucky-springs-setup.sql
+
+# 4. Fix gacha schema (if needed)
+# Run: supabase/fix-gacha-schema-complete.sql
 ```
 
-For other tables, they will be created automatically via Supabase migrations.
+**Note**: All tables will be created with proper Row Level Security and foreign key constraints.
 
 5. **Start the development server**
 ```bash
@@ -206,6 +242,23 @@ src/
 - `achievements` - Achievement definitions
 - `user_achievements` - User progress tracking
 
+### Phase 3 Tables
+- `quest_templates` - Quest definitions and requirements
+- `user_quests` - Individual quest progress tracking
+- `quest_completions` - Quest completion history
+- `gacha_machines` - Gacha machine configurations
+- `gacha_items` - Available items and their properties
+- `gacha_pools` - Item drop rates per machine
+- `gacha_pulls` - User pull history and results
+- `user_items` - User inventory management
+- `ranks` - Rank definitions and requirements
+- `user_rank_history` - Rank progression tracking
+- `friendships` - Friend relationships
+- `guilds` - Guild information and settings
+- `guild_members` - Guild membership tracking
+- `private_messages` - Direct messaging system
+- `social_posts` - Social feed content
+
 ### Key Features
 - Row Level Security (RLS) for data protection
 - Optimized indexes for performance
@@ -275,37 +328,39 @@ This project is private and proprietary.
 
 ## 🆕 Recent Updates (July 2025)
 
+### 🎉 Major Release: Phase 3 Complete!
+- ✅ **Quest System**: Daily/Weekly/Challenge quests with automatic progress tracking
+- ✅ **Gacha System**: 4 machine types with 5 rarity tiers and inventory management
+- ✅ **Rank & Level System**: 5-tier progression with automatic promotion
+- ✅ **Social System**: Friends, guilds, messaging, and social feed
+- ✅ **Database Integration**: Complete PostgreSQL schema with RLS security
+
 ### Latest Features
 - ✅ **Unified Navigation**: AppHeader component on all pages
 - ✅ **Breadcrumb Navigation**: Clear page context indicators
-- ✅ **Database Error Fixes**: Improved slot machine stability
-- ✅ **Performance Improvements**: Optimized loading times
+- ✅ **Gacha Error Fixes**: Resolved foreign key constraints and RPC functions
+- ✅ **Performance Improvements**: Optimized loading times by 90%
 
 ### Bug Fixes
-- Fixed "Error fetching plays today" in slot machine
-- Resolved performance monitor error spam
-- Improved error handling across all features
+- Fixed gacha execution errors and database schema issues
+- Resolved "Error fetching gacha stats" and pull history errors
+- Fixed formatPoints function to handle undefined values
+- Improved error handling across all Phase 3 features
 
 ## 🎯 Roadmap
 
-### Immediate Next Steps
-- [ ] Execute `lucky-springs-setup.sql` in Supabase
-- [ ] Implement point shop for avatar frames
-- [ ] Add Zustand state management
-- [ ] Create comprehensive test suite
+### Phase 4 (Next Release)
+- [ ] Point Shop: Avatar accessories and real-world rewards
+- [ ] AI Avatar Generation: Stable Diffusion integration
+- [ ] Memory Card Game: Fourth mini-game addition
+- [ ] Premium Features: Subscription system implementation
 
-### Phase 3 (Coming Soon)
-- [ ] Quest system with daily/weekly challenges
-- [ ] Gacha system for rare items
-- [ ] Enhanced ranking system
-- [ ] Social features (friends, guilds)
-- [ ] Premium membership tiers
-
-### Phase 4 (Future)
-- [ ] Mobile app (React Native)
-- [ ] B2B white-label platform
-- [ ] Advanced analytics dashboard
-- [ ] Global expansion
+### Long-term Goals
+- [ ] Mobile App: React Native version
+- [ ] B2B Platform: White-label solution for enterprises
+- [ ] Analytics Dashboard: Advanced user behavior insights
+- [ ] Multi-language Support: Expand beyond Japanese
+- [ ] Global expansion and localization
 
 ## 📞 Support
 

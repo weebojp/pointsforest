@@ -13,8 +13,9 @@ import { AppHeader } from '@/components/layout/AppHeader'
 
 // Lazy load game components for better performance
 const NumberGuessingGame = lazy(() => import('@/components/features/games/NumberGuessingGame').then(module => ({ default: module.NumberGuessingGame })))
-const RouletteGame = lazy(() => import('@/components/features/games/RouletteGame').then(module => ({ default: module.RouletteGame })))
-const SlotMachineGame = lazy(() => import('@/components/features/games/SlotMachineGame'))
+// 運要素のあるゲームは法的理由により一時的に無効化
+// const RouletteGame = lazy(() => import('@/components/features/games/RouletteGame').then(module => ({ default: module.RouletteGame })))
+// const SlotMachineGame = lazy(() => import('@/components/features/games/SlotMachineGame'))
 
 export default function GamesPage() {
   const { user, loading: authLoading } = useAuth()
@@ -149,16 +150,20 @@ export default function GamesPage() {
               />
             )}
 
+            {/* ルーレットゲームは法的理由により一時的に無効化
             {selectedGame.type === 'roulette' && (
               <RouletteGame 
                 game={selectedGame} 
                 onComplete={onGameComplete}
               />
             )}
+            */}
 
+            {/* スロットマシンゲームは法的理由により一時的に無効化
             {selectedGame.type === 'slot_machine' && (
               <SlotMachineGame />
             )}
+            */}
           </Suspense>
         </div>
       </div>
@@ -246,7 +251,7 @@ export default function GamesPage() {
           </div>
         )}
 
-        {/* Standalone Slot Machine */}
+        {/* スタンドアロンスロットマシンは法的理由により一時的に無効化
         <div className="mt-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
             <Coins className="h-6 w-6 text-yellow-500" />
@@ -279,6 +284,7 @@ export default function GamesPage() {
             </Card>
           </div>
         </div>
+        */}
 
         {/* Game Instructions */}
         <Card className="mt-8">

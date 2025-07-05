@@ -24,11 +24,15 @@ export function GachaMachine({ machine, userPullsToday, onPull, disabled = false
   const [isPulling, setIsPulling] = useState(false)
   const [showRates, setShowRates] = useState(false)
 
+  // Map database fields to frontend expected fields
+  const costAmount = machine.cost_amount || (machine as any).cost_per_pull || 0
+  const dailyLimit = machine.daily_limit || (machine as any).pulls_per_day || null
+
   const typeInfo = GACHA_TYPE_INFO[machine.type]
-  const canPull = machine.daily_limit ? userPullsToday < machine.daily_limit : true
-  const remainingPulls = machine.daily_limit ? machine.daily_limit - userPullsToday : null
-  const canAfford = profile ? profile.points >= machine.cost_amount : false
-  const canAfford10 = profile ? profile.points >= (machine.cost_amount * 10) : false
+  const canPull = dailyLimit ? userPullsToday < dailyLimit : true
+  const remainingPulls = dailyLimit ? dailyLimit - userPullsToday : null
+  const canAfford = profile ? profile.points >= costAmount : false
+  const canAfford10 = profile ? profile.points >= (costAmount * 10) : false
 
   const getTypeIcon = () => {
     switch (typeInfo.icon) {
@@ -115,7 +119,7 @@ export function GachaMachine({ machine, userPullsToday, onPull, disabled = false
         <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
           <div className="flex items-center gap-1">
             <Coins className="h-4 w-4" />
-            <span>{formatPoints(machine.cost_amount)} pt/回</span>
+            <span>{formatPoints(costAmount)} pt/回</span>
           </div>
           {remainingPulls !== null && (
             <div className="flex items-center gap-1">
@@ -154,7 +158,7 @@ export function GachaMachine({ machine, userPullsToday, onPull, disabled = false
             ) : (
               <>
                 <Coins className="h-4 w-4 mr-2" />
-                1回引く ({formatPoints(machine.cost_amount)}pt)
+                1回引く ({formatPoints(costAmount)}pt)
               </>
             )}
           </Button>
@@ -174,7 +178,7 @@ export function GachaMachine({ machine, userPullsToday, onPull, disabled = false
               ) : (
                 <>
                   <Sparkles className="h-4 w-4 mr-2" />
-                  10回引く ({formatPoints(machine.cost_amount * 10)}pt)
+                  10回引く ({formatPoints(costAmount * 10)}pt)
                 </>
               )}
             </Button>

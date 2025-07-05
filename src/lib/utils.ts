@@ -5,7 +5,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatPoints(points: number): string {
+export function formatPoints(points: number | undefined | null): string {
+  // Handle undefined, null, or invalid values
+  if (points == null || isNaN(points)) {
+    return '0'
+  }
+  
   if (points >= 1000000) {
     return `${(points / 1000000).toFixed(1)}M`
   }

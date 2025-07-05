@@ -21,13 +21,19 @@ import {
   ShoppingBag,
   Edit2,
   Save,
-  X
+  X,
+  Trophy,
+  TrendingUp,
+  Target
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { formatPoints, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import type { AvatarFrame, UserAvatarFrame, Purchase } from '@/types/avatar'
+import type { UserRankInfo } from '@/types/rank'
 import { AppHeader } from '@/components/layout/AppHeader'
+import { RankDisplay } from '@/components/features/rank/RankDisplay'
+import { useExperience } from '@/hooks/useExperience'
 
 interface ProfileData {
   displayName: string
@@ -37,6 +43,7 @@ interface ProfileData {
 
 export default function ProfilePage() {
   const { user, profile, loading: authLoading, refreshProfile } = useAuth()
+  const { getUserRankInfo } = useExperience()
   const [activeTab, setActiveTab] = useState('overview')
   const [dataLoading, setDataLoading] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -48,6 +55,7 @@ export default function ProfilePage() {
   const [ownedFrames, setOwnedFrames] = useState<UserAvatarFrame[]>([])
   const [availableFrames, setAvailableFrames] = useState<AvatarFrame[]>([])
   const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([])
+  const [rankInfo, setRankInfo] = useState<UserRankInfo | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -104,6 +112,10 @@ export default function ProfilePage() {
 
       if (purchasesError) throw purchasesError
       setPurchaseHistory(purchasesData || [])
+
+      // Fetch rank information
+      const rankData = await getUserRankInfo(user.id)
+      setRankInfo(rankData)
 
     } catch (error) {
       console.error('Error fetching profile data:', error)
@@ -238,10 +250,14 @@ export default function ProfilePage() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               プロフィール
+            </TabsTrigger>
+            <TabsTrigger value="rank" className="flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              ランク
             </TabsTrigger>
             <TabsTrigger value="avatar" className="flex items-center gap-2">
               <Palette className="h-4 w-4" />
@@ -374,6 +390,131 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Rank Tab */}
+          <TabsContent value="rank" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Current Rank Display */}
+              {rankInfo && rankInfo.success && rankInfo.rank && (
+                <RankDisplay
+                  level={rankInfo.level || 1}
+                  experience={rankInfo.experience || 0}
+                  nextLevelExp={rankInfo.next_level_exp || 100}
+                  rank={{
+                    name: rankInfo.rank.name,
+                    tier: rankInfo.rank.tier,
+                    color_primary: rankInfo.rank.color_primary,
+                    color_secondary: rankInfo.rank.color_secondary
+                  }}
+                />
+              )}
+
+              {/* Rank Benefits */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    ランク特典
+                  </CardTitle>
+                  <CardDescription>
+                    現在のランクで利用できる特典一覧
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {rankInfo?.rank?.benefits && (
+                    <div className="space-y-3">
+                      {rankInfo.rank.benefits.daily_bonus_multiplier && (
+                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                          <span className="text-sm">デイリーボーナス倍率</span>
+                          <span className="font-semibold text-blue-600">
+                            x{rankInfo.rank.benefits.daily_bonus_multiplier}
+                          </span>
+                        </div>
+                      )}
+                      {rankInfo.rank.benefits.exp_multiplier && (
+                        <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                          <span className="text-sm">経験値倍率</span>
+                          <span className="font-semibold text-green-600">
+                            x{rankInfo.rank.benefits.exp_multiplier}
+                          </span>
+                        </div>
+                      )}
+                      {rankInfo.rank.benefits.gacha_discount && (
+                        <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                          <span className="text-sm">ガチャ割引</span>
+                          <span className="font-semibold text-purple-600">
+                            {(rankInfo.rank.benefits.gacha_discount * 100).toFixed(0)}% OFF
+                          </span>
+                        </div>
+                      )}
+                      {rankInfo.rank.benefits.quest_bonus && (
+                        <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                          <span className="text-sm">クエストボーナス</span>
+                          <span className="font-semibold text-orange-600">
+                            +{(rankInfo.rank.benefits.quest_bonus * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-gray-600 mb-2">
+                      次のランクアップまで
+                    </p>
+                    <div className="text-center p-4 bg-gray-50 rounded-lg">
+                      <p className="text-lg font-semibold">
+                        レベル {rankInfo?.rank?.tier === 5 ? 'MAX' : ((rankInfo?.rank?.tier || 1) + 1) * 25} で昇格
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {rankInfo?.rank?.tier === 5 
+                          ? '最高ランクに到達しています！' 
+                          : '上位ランクでさらなる特典を獲得'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Experience History */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  レベル進捗
+                </CardTitle>
+                <CardDescription>
+                  現在のレベルとランクの詳細情報
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">
+                      {rankInfo?.level || 1}
+                    </div>
+                    <div className="text-sm text-gray-600">現在レベル</div>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
+                    <div className="text-3xl font-bold text-green-600 mb-2">
+                      {formatPoints(rankInfo?.experience || 0)}
+                    </div>
+                    <div className="text-sm text-gray-600">現在EXP</div>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
+                    <div className="text-3xl font-bold text-purple-600 mb-2">
+                      {formatPoints(rankInfo?.next_level_exp || 100)}
+                    </div>
+                    <div className="text-sm text-gray-600">次レベルまで</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Avatar Tab */}
