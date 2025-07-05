@@ -610,3 +610,69 @@
 .rank-pulse {
   animation: rank-pulse 2s ease-in-out infinite;
 }
+
+/* ====================================
+ * HOMEPAGE ANIMATIONS & STYLES
+ * ====================================*/
+
+/* Gradient text for hero title */
+.gradient-text {
+  background: linear-gradient(135deg, #10B981 0%, #059669 50%, #065F46 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Floating animation for elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse animation for CTA buttons */
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.pulse-scale {
+  animation: pulse-scale 2s ease-in-out infinite;
+}
+
+/* Hover effects */
+.feature-card-hover {
+  transition: all 0.3s ease;
+}
+
+.feature-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Background gradient animations */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animated-gradient {
+  background: linear-gradient(-45deg, #065F46, #10B981, #34D399, #6EE7B7);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
